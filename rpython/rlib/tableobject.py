@@ -13,21 +13,17 @@ from rpython.rlib.rarithmetic import ovfcheck
 from rpython.rlib import jit, objectmodel, rerased, rarithmetic
 
 class W_TableObject:
-    contain_typed = None
     tabOne = None
     tabTwo = None
     tabThree = None
     size = 0
     map_dict = {}
     
-    def get_type(self):   
-        print("type", self.contain_typed) 
                  
     def split_list(self, w_vector, new_strategy, list_w, hint, index0= -1):
         self.tabOne = w_vector
         copied = copy.deepcopy(w_vector)
         lst = w_vector.get_strategy()._storage(w_vector)
-        print("UN LIST", lst)
         del lst[index0]
         lst_w = [w_vector.get_strategy().wrap(i) for i in lst]
         storage = w_vector.get_strategy().create_storage_for_elements(lst_w)
@@ -43,12 +39,7 @@ class W_TableObject:
         storage = new_strategy.create_storage_for_element(hint, 1)
         self.tabTwo.set_strategy(new_strategy)
         self.tabTwo.set_storage(storage)
-        print("TABLE ONE", self.tabOne.get_strategy()._storage(self.tabOne))
-        print("TABLE TWO", self.tabTwo.get_strategy()._storage(self.tabTwo))
-        print("maping0", self.map_dict)
         self.map_dict = self.update_map("tabOne")
-        print("maping", self.map_dict)
-        print("TABLE", self.tabTwo.table, self.tabOne.table)
 
     def split_hash(self, w_dict, w_key, w_val):
         # keys = [w_dict.strategy.wrap(key) for key in dict_w.keys()]
@@ -58,9 +49,6 @@ class W_TableObject:
         self.tabTwo = w_dict.make_empty()
         self.tabTwo._set(w_key, w_val)
         
-        print("tabon hash", self.tabOne.strategy.unerase(self.tabOne.hstorage))
-
-        print("tabtwo hash", self.tabTwo.strategy.unerase(self.tabTwo.hstorage))
 
     def get_storage_hash(self):
         return self.tabOne.strategy.unerase(self.tabOne.hstorage).update(self.tabTwo.strategy.unerase(self.tabTwo.hstorage))
@@ -93,12 +81,6 @@ class W_TableObject:
                     self.tabThree.strategy.get_storage(self.tabThree).append(self.tabThree.strategy.unwrap(list_w[i]))
                     self.map_dict[self.size] = ('tabThree', self.tabThree.strategy.get_storage(self.tabThree).index(self.tabThree.strategy.unwrap(list_w[i])))
             self.size+=1
-        if self.tabOne:
-            print("tabOne", self.tabOne.strategy.get_storage(self.tabOne))
-        if self.tabTwo:
-            print("tabTwo", self.tabTwo.strategy.get_storage(self.tabTwo))
-        if self.tabThree:
-            print("tabThree", self.tabThree.strategy.get_storage(self.tabThree))
 
     
     def _reverse_map(self):
@@ -238,11 +220,6 @@ class W_TableObject:
 
         self.size+=1
 
-        if self.tabOne:
-            print("tabOne", self.tabOne.strategy.get_storage(self.tabOne))
-        if self.tabTwo:
-            print("tabTwo", self.tabTwo.strategy.get_storage(self.tabTwo))
-
     def storage(self):
         storage = []
         if self.tabOne:
@@ -304,7 +281,6 @@ class W_TableObject:
         
         if self.tabOne.strategy.is_correct_type(self.tabOne, wrapped_value):
             y = [i for i in self.map_dict.keys() if self.map_dict[i][0] == "tabOne"]
-            print("CHECK", y, index0, self.tabOne.strategy._storage(self.tabOne), self.map_dict)
             if index0 >= max(y):
                 self.tabOne.strategy._storage(self.tabOne).insert(index0, self.tabOne.strategy.unwrap(wrapped_value))
             else:
@@ -333,12 +309,6 @@ class W_TableObject:
         self.map_dict = self.update_map('tabOne')
         self.map_dict = self.update_map('tabTwo')
         self.map_dict = self.update_map('tabThree')
-        if self.tabOne:
-            print("tabOne", self.tabOne.strategy._storage(self.tabOne))
-        if self.tabTwo:
-            print("tabTwo", self.tabTwo.strategy._storage(self.tabTwo))
-        if self.tabThree:
-            print("tabThree", self.tabThree.strategy._storage(self.tabThree))
     
     def update_map(self, table):
         updated_dict = {}
